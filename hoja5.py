@@ -61,7 +61,7 @@ wt=Monitor()
 initialize() #inicar la simulacion. Tiempo = 0
 nrCars=10
 cpu = Resource(capacity=1)
-#azar = Random() #se puede reproducir los mismos numeros al azar
+azar = Random() #se puede reproducir los mismos numeros al azar
 parkingLot=Resource(capacity=4,qType=FIFO)
 #memoria = container(init=100,capacity=100)
 Memoria= Resource(capacity=100)
@@ -74,7 +74,7 @@ for i in range(nrCars):
     #activar los carros en la lista de simulacion. Se genera un numero
     #al azar para indicar el tiempo que se conduce cada carro para llegar
     #a la meta.
-    activate(c,c.ejecutar(cantRAM=random.randint(1,10+1),cantInstrucciones=random.randint(1,10+1)))
+    activate(c,c.ejecutar(cantRAM=azar.randint(1,10+1),cantInstrucciones=azar.randint(1,10+1)))
     
 simulate(until=100) #simular para 100 unidades de tiempo
 
