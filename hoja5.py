@@ -6,6 +6,7 @@ class Procesos(Process):
 		self.nombre=id
 
 	def ejecutar(self,cantRAM,cantInstrucciones):
+		self.llega= now() #tiempo de ingreso del proceso
 		if Memoria>=cantRAM:
 			self.RAM=cantRAM		
 			print "El proceso", self.nombre ,"solicita ", self.RAM ," MB de RAM"
@@ -20,18 +21,20 @@ class Procesos(Process):
 			yield release,self,ready
 			print self.nombre, "está listo para ser atendido por el cpu"
 			
-			if (self.cantInstrucciones-i)<=0:
+			if (self.cantInstrucciones-i)<=0:#mira si puede resolver las instrucciones con una solo llegada al cpu
 				print "No se necesitan más de 1 ciclo para ",self.nombre , ", usa ",self.cantInstrucciones, "instrucciones" 
 				yield request, self, cpu
 				print self.nombre, "obtiene cpu"
 				self.cantInstrucciones=self.cantInstrucciones-i
 				i=i+1
 				yield release, self, cpu
+				tiempoProceso= now() - self.llega
+				wt.observe(tiempoProceso)
 				print self.nombre, "libera cpu"
 				print self.nombre, "sale del sistema"
 					
-			else:
-				print "Se necesitan más de 1 ciclo para el proceso",self.nombre, "usa ",self.cantInstrucciones
+			else:#si se necesita más de una llegada al cpu para resolver el proceso
+				print "Se necesitan más de 1 ciclo para el proceso",self.nombre, "usa ",self.cantInstrucciones, "instrucciones" 
 				yield request, self, cpu
 				print self.nombre, "obtiene cpu"
 				self.cantInstrucciones=self.cantInstrucciones-i
@@ -54,10 +57,11 @@ class Procesos(Process):
 				
 
 
+wt=Monitor()
 initialize() #inicar la simulacion. Tiempo = 0
-nrCars=2
+nrCars=10
 cpu = Resource(capacity=1)
-azar = Random(87298673) #se puede reproducir los mismos numeros al azar
+#azar = Random() #se puede reproducir los mismos numeros al azar
 parkingLot=Resource(capacity=4,qType=FIFO)
 #memoria = container(init=100,capacity=100)
 Memoria= Resource(capacity=100)
@@ -70,6 +74,8 @@ for i in range(nrCars):
     #activar los carros en la lista de simulacion. Se genera un numero
     #al azar para indicar el tiempo que se conduce cada carro para llegar
     #a la meta.
-    activate(c,c.ejecutar(cantRAM=azar.randint(1,10+1),cantInstrucciones=azar.randint(1,10+1)))
+    activate(c,c.ejecutar(cantRAM=random.randint(1,10+1),cantInstrucciones=random.randint(1,10+1)))
     
 simulate(until=100) #simular para 100 unidades de tiempo
+
+print "Tiempo total de los procesos: \tmean = %5.1f, \n\t\tvariance=%2d"%(wt.mean(),wt.var())
