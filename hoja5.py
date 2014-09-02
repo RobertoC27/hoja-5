@@ -1,17 +1,32 @@
+#Roberto Chiroy
+#Diego Jacobs
+
 from SimPy.Simulation import *
 from random import uniform, Random
+class Memoria():
+	
+	def __init__():
+	Process.__init__(self)
+	self.nombre=id
+	mem = 5
+	
 class Procesos(Process):
 	def __init__(self,id):
 		Process.__init__(self)
 		self.nombre=id
 
-	def ejecutar(self,cantRAM,cantInstrucciones):
+	def ejecutar(self,cantRAM,cantInstrucciones,mem):
 		self.llega= now() #tiempo de ingreso del proceso
+		Memoria = mem
+		self.RAM=cantRAM
 		if Memoria>=cantRAM:
-			self.RAM=cantRAM		
+			Memoria = Memoria - cantRAM
+			print "->",Memoria
 			print "El proceso", self.nombre ,"solicita ", self.RAM ," MB de RAM"
 			
 		else:
+			print "->",Memoria
+			print "El proceso", self.nombre ,"solicita ", self.RAM ," MB de RAM"
 			print "No hay suficiente memoria para el proceso", self.nombre
 		self.cantInstrucciones=cantInstrucciones
 		i=3
@@ -30,6 +45,7 @@ class Procesos(Process):
 				yield release, self, cpu
 				tiempoProceso= now() - self.llega
 				wt.observe(tiempoProceso)
+				Memoria = Memoria + cantRAM
 				print self.nombre, "libera cpu"
 				print self.nombre, "sale del sistema"
 					
@@ -59,12 +75,12 @@ class Procesos(Process):
 
 wt=Monitor()
 initialize() #inicar la simulacion. Tiempo = 0
-nrCars=10
+nrCars=5
+Memoria=5
+#memoria = container(init=100,capacity=100)
 cpu = Resource(capacity=1)
 azar = Random() #se puede reproducir los mismos numeros al azar
 parkingLot=Resource(capacity=4,qType=FIFO)
-#memoria = container(init=100,capacity=100)
-Memoria= Resource(capacity=100)
 ready=Resource(capacity=20,qType=FIFO)
 waiting=Resource(capacity=20,qType=FIFO)
 
@@ -74,7 +90,7 @@ for i in range(nrCars):
     #activar los carros en la lista de simulacion. Se genera un numero
     #al azar para indicar el tiempo que se conduce cada carro para llegar
     #a la meta.
-    activate(c,c.ejecutar(cantRAM=azar.randint(1,10+1),cantInstrucciones=azar.randint(1,10+1)))
+    activate(c,c.ejecutar(cantRAM=azar.randint(1,7+1),cantInstrucciones=azar.randint(1,10+1),mem = Memoria))
     
 simulate(until=100) #simular para 100 unidades de tiempo
 
